@@ -1,0 +1,5 @@
+{
+  "name": "IDENT ME - 성향 및 진로 탐색",
+  "description": "자신의 성향(T/F/A/C)과 기질을 분석하여 적합한 진로를 추천해주는 인터랙티브 테스트입니다.",
+  "requestFramePermissions": []
+}
