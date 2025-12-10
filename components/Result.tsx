@@ -16,6 +16,7 @@ export const Result: React.FC<ResultProps> = ({ score, onRestart }) => {
   const [career, setCareer] = useState<CareerResult | null>(null);
   const [aiAdvice, setAiAdvice] = useState<string>('');
   const [loadingAi, setLoadingAi] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
   
   // Percentages for visualization
   const [traitPercent, setTraitPercent] = useState({ t: 0, f: 0, a: 0, c: 0 });
@@ -72,6 +73,34 @@ export const Result: React.FC<ResultProps> = ({ score, onRestart }) => {
     fetchAdvice();
 
   }, [score]);
+
+  const handleShare = async () => {
+    // Data to be shared
+    const shareData = {
+      title: 'IDENT ME - 성향 분석 결과',
+      text: `나의 성향은 [${personality?.title}]입니다.\n당신의 잠재력도 확인해보세요! 👇`,
+      url: window.location.href, // This shares the current URL
+    };
+
+    // Use Web Share API if available (Mobile Native Share)
+    if (navigator.share) {
+        try {
+            await navigator.share(shareData);
+            return;
+        } catch (err) {
+            console.log("Share skipped, falling back to clipboard");
+        }
+    }
+
+    // Fallback: Copy to clipboard
+    try {
+        await navigator.clipboard.writeText(window.location.href);
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 3000); // 3초 동안 유지
+    } catch (err) {
+        alert("링크 복사에 실패했습니다. 브라우저 주소창을 복사해주세요.");
+    }
+  };
 
   if (!personality || !temperament || !career) return <div className="text-center mt-32 text-gray-500 animate-pulse font-medium">데이터 분석 중...</div>;
 
@@ -218,11 +247,37 @@ export const Result: React.FC<ResultProps> = ({ score, onRestart }) => {
             </div>
        </div>
 
-       <div className="flex justify-center pt-8">
+       {/* Action Buttons: Restart & Share */}
+       <div className="flex flex-col md:flex-row gap-4 justify-center pt-4">
             <Button onClick={onRestart} variant="secondary" className="px-10 py-4 text-base shadow-sm hover:shadow-md bg-white border border-gray-200">
-                테스트 다시하기
+                🔄 테스트 다시하기
+            </Button>
+            <Button onClick={handleShare} variant="primary" className="px-10 py-4 text-base shadow-lg shadow-violet-200">
+                {isCopied ? '✅ 링크 복사 완료!' : '🔗 결과 공유하기'}
             </Button>
        </div>
+
+       {/* Sponsored Banner */}
+       <a 
+         href="http://cd.kjca.co.kr/"
+         target="_blank"
+         rel="noopener noreferrer"
+         className="mt-8 block relative overflow-hidden rounded-xl bg-gradient-to-r from-gray-900 to-slate-800 text-white p-6 shadow-xl cursor-pointer group hover:scale-[1.01] transition-transform duration-300"
+       >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500 rounded-full blur-[80px] opacity-20 -translate-y-1/2 translate-x-1/3"></div>
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+                <div>
+                    <p className="text-xs font-bold text-violet-300 uppercase tracking-widest mb-1">Premium Coding Education</p>
+                    <p className="text-lg md:text-xl font-bold">
+                        바이브코딩은 <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">더국제</span>
+                    </p>
+                </div>
+                <div className="bg-white/10 px-4 py-2 rounded-lg border border-white/10 backdrop-blur-sm group-hover:bg-white/20 transition-colors">
+                    <span className="text-xl md:text-2xl font-black text-yellow-400 tracking-wider">062-971-1114</span>
+                </div>
+            </div>
+       </a>
+
     </div>
   );
 };
